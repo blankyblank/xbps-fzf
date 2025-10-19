@@ -222,11 +222,6 @@ If you cloned it, change directories to where you cloned it with
 ```
 $ cd xfzf
 ```
-If you want to use a stable release instead of the main branch.
-```
-$ git checkout v0.1beta
-```
-
 Make it executable with
 ```
 $ chmod +x xfzf
