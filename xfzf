@@ -1,0 +1,170 @@
+#!/usr/bin/sh
+## shellcheck disable=2034
+# shellcheck disable=2086
+set -efu
+
+#  --reverse\
+export FZF_DEFAULT_OPTS="+s -m -n 1\
+  --color='16,hl:5, current-hl:5, gap-line:8, input-border:5, prompt:5, spinner:5, pointer:5, selected-hl:5, gutter:-1'\
+  --ansi\
+  --cycle\
+  --accept-nth=2\
+  --pointer='>'\
+  --prompt='$ '\
+  --marker='+'\
+  --margin=0%\
+  --padding=0%\
+  --scroll-off=20\
+  --info=inline-right\
+  --no-separator\
+  --border-label-pos=24\
+  --list-border=rounded\
+  --preview-border=top \
+  --preview-label='Package Info'\
+  --preview-window 'right,45%'\
+  --preview='xbps-query -R {2}'\
+  --bind 'alt-p:toggle-preview'\
+  --bind 'alt-space:change-preview-window(top,44%|)'"
+
+usage() {
+  cat <<-EOF
+	usgage: xfzf [option]
+
+	A fzf script for xbps.
+
+	Options:
+	  none              search for for packages to install
+	  -d, --description search for packages by description to install
+	  -r, --remove      search for manually installed packages to remove
+	  -h, --help        show a help message
+
+	EOF
+  exit 1
+}
+
+help_msg() {
+  cat <<-EOF
+	xfzf
+	A fzf script for xbps.
+	
+	running xfzf with no options opens a fzf menu, of all the packages
+	available in your enabled repos allowing you to select one or multiple
+	to install
+	
+	the -r or --remove option shows the packages you have manually installed.
+	Allowing you to uninstall one or multiple recursively.
+	
+	the default preview shows the output of xbps-query of the hovered package.
+	When in remove mode preview will show the the package's dependencies.
+	
+	You can selected multiple packages in either mode with the tab key then
+	press enter to install, or remove the chosen packages in the given mode.
+
+	Usgage: xfzf [option]
+
+	Options:
+	  none              search for for packages to install
+	  -d, --description search for packages by description to install
+	  -r, --remove      search for manually installed packages to remove
+	  -h, --help        show a help message
+
+	Keybinds:
+	  alt-p             toggle preview window
+	  alt-space         toggle preview position
+	  alt-d             preview dependencies
+	  alt-f             preview installed files
+	  Escape            exit without taking any action
+	
+	Remove Mode Keybinds:
+	  alt-d             preview package information
+	  alt-f             preview installed files
+	EOF
+  exit
+}
+
+_repo_search() {
+  xbps-query -Rs "*"
+}
+
+_manual_packages() {
+  xbps-query -m
+}
+
+xbps_finder() {
+  pkgpick=$( _repo_search | fzf --nth=2 --list-label='  Available Packages  '\
+    --bind 'alt-d:preview:xbps-query -Rx {2}' --bind 'alt-f:preview:xbps-query -Rf {2}')
+ 
+  if [ -z "$pkgpick" ]; then
+    exit
+  else
+    sudo xbps-install -S $pkgpick
+  fi
+  exit
+}
+
+xbps_finder_desc() {
+  descpkgpick=$(_repo_search | fzf --nth=3 --list-label='  Available Packages  '\
+    --bind 'alt-d:preview:xbps-query -Rx {2}' --bind 'alt-f:preview:xbps-query -Rf {2}')
+  if [ -z "$descpkgpick" ]; then
+    exit
+  else
+    sudo xbps-install -v $descpkgpick
+  fi
+  exit
+}
+
+xbps_remove() {
+  unpkgpick="$(_manual_packages | fzf --accept-nth=1 --list-label='  Installed Packages  '\
+    --preview='xbps-query -x {1}' --bind 'alt-f:preview:xbps-query -f {1}' --bind 'alt-d:preview:xbps-query {2}' )"
+  if [ -z "$unpkgpick" ]; then
+    exit
+  else
+    sudo xbps-remove -R $unpkgpick
+  fi
+  exit
+}
+
+if ! opts=$(getopt -s sh -o 'd,r,h' -l description,remove,help -n "xfzf" -- "$@")
+then
+  usage >&2
+fi
+
+eval set -- "$opts"
+unset opts
+_DEFAULT_=
+_DESC_=
+_REMOVE_=
+HALP=
+
+while true; do
+  case "$1" in
+    -d | --description)
+      export _DESC_=true
+      break
+      ;;
+    -r | --remove)
+      export _REMOVE_=true
+      break
+      ;;
+    -h | --help)
+      export HALP=true
+      break
+      ;;
+    *)
+      export _DEFAULT_=true
+      break
+      ;;
+  esac
+done
+
+if [ -n "$_DEFAULT_" ]; then
+  xbps_finder
+elif [ -n "$_DESC_" ]; then
+  xbps_finder_desc
+elif [ -n "$_REMOVE_" ]; then
+  xbps_remove
+elif [ -n "$HALP" ]; then
+  help_msg
+else 
+  usage >&2
+fi
