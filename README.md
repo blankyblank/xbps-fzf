@@ -1,4 +1,4 @@
-# xfzf
+# xbps-fzf
 
 
 A script using fzf on void, to search the available packages in your enabled repositories
@@ -26,26 +26,26 @@ When launched by default with no options it will install packages, with -r it wi
 Usage:
 To search through the packages available in your enabled repos.
 ```bash
-$ xfzf
+$ xbps-fzf
 ```
 To search through the packages available in your enabled repos, searching by description.
 ```bash
-$ xfzf -d
+$ xbps-fzf -d
     or
-$ xfzf --description
+$ xbps-fzf --description
 ```
 To look through your manually installed packages for packages to remove packages
 (or just search your installed packages if you press escape it exits)
 ```bash
-$ xfzf -r
+$ xbps-fzf -r
     or
-$ xfzf --remove
+$ xbps-fzf --remove
 ```
 for a help message with the extra keybinds
 ```bash
-$ xfzf -h
+$ xbps-fzf -h
     or
-$ xfzf --help
+$ xbps-fzf --help
 ```
 
 <br>
@@ -70,7 +70,7 @@ files installed by that package.
    
 ## fzf tips.
 
-When you have xfzf open to change the way fzf searches you can use a few different methods.
+When you have xbps-fzf open to change the way fzf searches you can use a few different methods.
 
 By quoting a string you will enable exact-match mode.
 Meaning if you quote your search it will search for that exact string instead of fuzzy searching.
@@ -174,10 +174,10 @@ Dependencies:
 
 First git clone the repo wherever you would like to my suggestion is ~/.local/src
 ```
-$ git clone https://github.com/blankyblank/xfzf.git
+$ git clone https://github.com/blankyblank/xbps-fzf.git
 ```
 ```
-$ cd xfzf
+$ cd xbps-fzf
 ```
 If you want to use a stable release instead of the main branch.
 ```
@@ -212,19 +212,19 @@ $ sudo ./install.sh -u
 
 To install it either git clone the repo
 ```
-$ git clone https://github.com/blankyblank/xfzf.git
+$ git clone https://github.com/blankyblank/xbps-fzf.git
 ```
 
-Or download the xfzf file.
+Or download the xbps-fzf file.
 
 If you cloned it, change directories to where you cloned it with
 
 ```
-$ cd xfzf
+$ cd xbps-fzf
 ```
 Make it executable with
 ```
-$ chmod +x xfzf
+$ chmod +x xbps-fzf
 ```
 Then add it somewhere on your path. My recommendation is:
 
@@ -238,13 +238,13 @@ Add to your .bash_profile, or .bashrc (or whatever shell you use.)
 PATH=$PATH:"$HOME"/.local/bin
 ```
 
-Then move xfzf to that directory.
+Then move xbps-fzf to that directory.
 ```
-$ mv xfzf ~/.local/bin
+$ mv xbps-fzf ~/.local/bin
 ```
 If you git cloned it you can make a symlink to it.
-You will use the full path to the xfzf script. So if it's currently in
+You will use the full path to the xbps-fzf script. So if it's currently in
 your home direcory in the cloned git repo
 ```
-$ ln -s ~/xfzf/xfzf ~/.local/bin/
+$ ln -s ~/xbps-fzf/xbps-fzf ~/.local/bin/
 ```
