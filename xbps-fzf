@@ -97,7 +97,10 @@ xbps_finder() {
   if [ -z "$pkgpick" ]; then
     exit
   else
+    preserve_stty=$(stty -g)
+    stty sane </dev/tty
     sudo xbps-install -S $pkgpick
+    exec stty "$preserve_stty"
   fi
   exit
 }
@@ -108,7 +111,10 @@ xbps_finder_desc() {
   if [ -z "$descpkgpick" ]; then
     exit
   else
+    preserve_stty=$(stty -g)
+    stty sane </dev/tty
     sudo xbps-install -v $descpkgpick
+    exec stty "$preserve_stty"
   fi
   exit
 }
@@ -119,7 +125,10 @@ xbps_remove() {
   if [ -z "$unpkgpick" ]; then
     exit
   else
+    preserve_stty=$(stty -g)
+    stty sane </dev/tty
     sudo xbps-remove -R $unpkgpick
+    exec stty "$preserve_stty"
   fi
   exit
 }
