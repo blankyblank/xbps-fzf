@@ -9,15 +9,11 @@ But it's adapted to work on void. It should be mostly screenshots that need to b
 
 ### Launced in install mode:  
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/982969ba-e7e5-4b9f-85a3-6407a25bd4fe" />
-
-### With the preview on the right:
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/84e9f1fb-69eb-4e01-91c7-0ff54e98f52d" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bfe671f3-b896-4101-a0b3-44316d17b1b0" />
 
 ### Launched in remove mode:
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b2bfbddd-ee1b-4f35-87dd-a64b2b0f9b8f" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e9427a8a-85a3-476f-987d-d2a23fcad49e" />
 
 ## Usage
 
@@ -40,6 +36,15 @@ To look through your manually installed packages for packages to remove packages
 $ xbps-fzf -r
     or
 $ xbps-fzf --remove
+```
+You can also list any orphans you have left over on your system from packages that have been removed 
+in the past. So you can interactively search through them to see if there are any you want to remove.
+By using the -o option.
+
+```bash
+$ xbps-fzf -o
+    or
+$ xbps-fzf --orphans
 ```
 for a help message with the extra keybinds
 ```bash
@@ -76,7 +81,7 @@ By quoting a string you will enable exact-match mode.
 Meaning if you quote your search it will search for that exact string instead of fuzzy searching.
 like so 
 ```
-$ 'dwm
+$ 'nano
 ```
 Adding the single quote can be especially useful for short strings like this. 
 Because otherwise it might not narrow the results down enough.
@@ -84,8 +89,7 @@ Because otherwise it might not narrow the results down enough.
 In this case it instead of getting results like these.
 
 <br>
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0f446081-da60-4e6d-b883-edab44694fb0" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ece61121-bdfb-4380-ad87-6167783e2ea1" />
 
 <br>
 
@@ -93,7 +97,7 @@ You narrow down the results to just those directly matching like so:
 
 <br>
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e962194a-509f-467d-95cc-e473d96c9cc3" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/adbd0f2d-81f0-4e8f-bc11-222560ab7206" />
 
 <br>
 
@@ -102,13 +106,12 @@ So if you were to add this, to the search in the above example.
 
 
 ```
-$ !sec
+$ !msg
 ```
 
 <br>
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/86526c05-7353-41a0-bf45-35fa3c94b537" />
-
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/daa124a1-3c64-476f-bb3a-764b7f84a43f" />
 
 <br>
 
@@ -125,7 +128,7 @@ And it will search for i3lock along with our first search like so:
 
 <br>
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/0916da65-e08e-42ea-ae56-431baf1fd105" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b20fbbe7-9d83-4bfd-a322-6e418cf58a71" />
 
 <br>
 
