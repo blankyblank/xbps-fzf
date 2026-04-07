@@ -1,30 +1,36 @@
-#!/usr/bin/sh
+#!/bin/sh
 ## shellcheck disable=2034
 # shellcheck disable=2086
+# shellcheck disable=2329
 set -efu
 
-#  --reverse\
+repo_search() { xbps-query -Rs "*";}
+installed_packages() { xbps-query -m;}
 export FZF_DEFAULT_OPTS="+s -m -n 1\
   --color='16,hl:5, current-hl:5, gap-line:8, input-border:5, prompt:5, spinner:5, pointer:5, selected-hl:5, gutter:-1'\
-  --ansi\
-  --cycle\
   --accept-nth=2\
-  --pointer='>'\
-  --prompt='$ '\
-  --marker='+'\
-  --margin=0%\
-  --padding=0%\
-  --scroll-off=20\
-  --info=inline-right\
-  --no-separator\
+  --ansi\
+  --bind 'alt-d:preview:xbps-query -Rx {2}'\
+  --bind 'alt-f:preview:xbps-query -Rf {2}'\
+  --bind 'alt-p:toggle-preview'\
+  --bind 'alt-space:change-preview-window(top,44%|)'\
   --border-label-pos=24\
+  --cycle\
+  --info=inline-right\
   --list-border=rounded\
+  --list-label='  Available Packages  '\
+  --margin=0%\
+  --marker='+'\
+  --no-separator\
+  --padding=0%\
+  --pointer='>'\
   --preview-border=top \
   --preview-label='Package Info'\
   --preview-window 'right,45%'\
-  --preview='xbps-query -R {2}'\
-  --bind 'alt-p:toggle-preview'\
-  --bind 'alt-space:change-preview-window(top,44%|)'"
+  --preview='xbps-query -RSv {2}'\
+  --prompt='$ '\
+  --scroll-off=20 \
+  --with-shell='/bin/sh -c'"
 
 usage() {
   cat <<-EOF
@@ -72,62 +78,36 @@ help_msg() {
 	  alt-p             toggle preview window
 	  alt-space         toggle preview position
 	  alt-d             preview dependencies
-	  alt-f             preview installed files
-	  Escape            exit without taking any action
-	
-	Remove Mode Keybinds:
-	  alt-d             preview package information
-	  alt-f             preview installed files
+	  alt-f             preview package files
+	  Escape            exit without taking any action	
 	EOF
   exit
 }
 
-_repo_search() {
-  xbps-query -Rs "*"
-}
-
-_manual_packages() {
-  xbps-query -m
-}
-
 xbps_finder() {
-  pkgpick=$( _repo_search | fzf --nth=2 --list-label='  Available Packages  '\
-    --bind 'alt-d:preview:xbps-query -Rx {2}' --bind 'alt-f:preview:xbps-query -Rf {2}')
- 
-  if [ -z "$pkgpick" ]; then
-    exit
+  if [ $_DESC_ ]; then
+    pkgpick=$(repo_search | fzf --nth=3)
   else
-    preserve_stty=$(stty -g)
-    stty sane </dev/tty
-    sudo xbps-install -S $pkgpick
-    exec stty "$preserve_stty"
+    pkgpick=$(repo_search | fzf --nth=2)
   fi
-  exit
-}
 
-xbps_finder_desc() {
-  descpkgpick=$(_repo_search | fzf --nth=3 --list-label='  Available Packages  '\
-    --bind 'alt-d:preview:xbps-query -Rx {2}' --bind 'alt-f:preview:xbps-query -Rf {2}')
-  if [ -z "$descpkgpick" ]; then
-    exit
-  else
+  if [ "$pkgpick" ]; then
     preserve_stty=$(stty -g)
     stty sane </dev/tty
-    sudo xbps-install -v $descpkgpick
+    sudo xbps-install -S $pkgpick || exec stty "$preserve_stty"
     exec stty "$preserve_stty"
   fi
   exit
 }
 
 xbps_remove() {
-  unpkgpick="$(_manual_packages | fzf --accept-nth=1 --list-label='  Installed Packages  '\
-    --preview='xbps-query -x {1}' --bind 'alt-f:preview:xbps-query -f {1}' --bind 'alt-d:preview:xbps-query {2}' )"
-  if [ -z "$unpkgpick" ]; then
-    exit
-  else
+  pkgpick="$(installed_packages | fzf --accept-nth=1 --list-label='  Installed Packages  ' \
+    --preview='xbps-query -Sv {1}' --bind 'alt-f:preview:xbps-query -f {1}' --bind 'alt-d:preview:xbps-query -x {1}')"
+
+  if [ "$pkgpick" ]; then
     preserve_stty=$(stty -g)
     stty sane </dev/tty
-    sudo xbps-remove -R $unpkgpick
+    sudo xbps-remove -R $pkgpick || exec stty "$preserve_stty"
     exec stty "$preserve_stty"
   fi
   exit
@@ -166,13 +146,11 @@ while true; do
   esac
 done
 
-if [ -n "$_DEFAULT_" ]; then
+if [ "$_DEFAULT_" ] || [ "$_DESC_" ]; then
   xbps_finder
-elif [ -n "$_DESC_" ]; then
-  xbps_finder_desc
-elif [ -n "$_REMOVE_" ]; then
+elif [ "$_REMOVE_" ]; then
   xbps_remove
-elif [ -n "$HALP" ]; then
+elif [ "$HALP" ]; then
   help_msg
 else 
   usage >&2
