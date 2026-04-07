@@ -182,10 +182,6 @@ $ git clone https://github.com/blankyblank/xbps-fzf.git
 ```
 $ cd xbps-fzf
 ```
-If you want to use a stable release instead of the main branch.
-```
-$ git checkout v0.1beta
-```
 to install it as a normal user.
 ```
 $ ./install.sh -i
