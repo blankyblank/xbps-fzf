@@ -1,11 +1,7 @@
 #!/bin/sh
-## shellcheck disable=2034
-# shellcheck disable=2086
-# shellcheck disable=2329
+
 set -efu
 
-repo_search() { xbps-query -Rs "*";}
-installed_packages() { xbps-query -m;}
 export FZF_DEFAULT_OPTS="+s -m -n 1\
   --color='16,hl:5, current-hl:5, gap-line:8, input-border:5, prompt:5, spinner:5, pointer:5, selected-hl:5, gutter:-1'\
   --accept-nth=2\
@@ -34,7 +30,7 @@ export FZF_DEFAULT_OPTS="+s -m -n 1\
 
 usage() {
   cat <<-EOF
-	usgage: xfzf [option]
+	usgage: xbps-fzf [option]
 
 	A fzf script for xbps.
 
@@ -42,6 +38,7 @@ usage() {
 	  none              search for for packages to install
 	  -d, --description search for packages by description to install
 	  -r, --remove      search for manually installed packages to remove
+	  -o, --orphans     search for orphaned packages to remove
 	  -h, --help        show a help message
 
 	EOF
@@ -50,7 +47,7 @@ usage() {
 
 help_msg() {
   cat <<-EOF
-	xfzf
+	xbsp-fzf
 	A fzf script for xbps.
 	
 	running xfzf with no options opens a fzf menu, of all the packages
@@ -66,12 +63,13 @@ help_msg() {
 	You can selected multiple packages in either mode with the tab key then
 	press enter to install, or remove the chosen packages in the given mode.
 
-	Usgage: xfzf [option]
+	Usgage: xbps-fzf [option]
 
 	Options:
 	  none              search for for packages to install
 	  -d, --description search for packages by description to install
 	  -r, --remove      search for manually installed packages to remove
+	  -o, --orphans     search for orphaned packages to remove
 	  -h, --help        show a help message
 
 	Keybinds:
@@ -82,6 +80,14 @@ help_msg() {
 	  Escape            exit without taking any action	
 	EOF
   exit
+}
+
+repo_search() { xbps-query -Rs "*";}
+installed_packages() { xbps-query -m;}
+fzf_rm() {
+  fzf --accept-nth=1 \
+  --list-label='  Installed Packages  ' --preview='xbps-query -Sv {1}' \
+  --bind 'alt-f:preview:xbps-query -f {1}' --bind 'alt-d:preview:xbps-query -x {1}'
 }
 
 xbps_finder() {
@@ -101,8 +107,16 @@ xbps_finder() {
 }
 
 xbps_remove() {
-  pkgpick="$(installed_packages | fzf --accept-nth=1 --list-label='  Installed Packages  ' \
-    --preview='xbps-query -Sv {1}' --bind 'alt-f:preview:xbps-query -f {1}' --bind 'alt-d:preview:xbps-query -x {1}')"
+  if [ "$_ORPHANS_" ]; then
+    _orfs=$(xbps-query -O)
+    if [ ! "$_orfs" ]; then
+      printf '%s\n' "no orphans found"
+      exit
+    fi
+    pkgpick=$(printf '%s\n' "$_orfs" | fzf_rm)
+  else
+    pkgpick="$(installed_packages | fzf_rm)"
+  fi
 
   if [ "$pkgpick" ]; then
     preserve_stty=$(stty -g)
@@ -113,7 +127,7 @@ xbps_remove() {
   exit
 }
 
-if ! opts=$(getopt -s sh -o 'd,r,h' -l description,remove,help -n "xfzf" -- "$@")
+if ! opts=$(getopt -s sh -o 'd,r,o,h' -l description,remove,orphans,help -n "xfzf" -- "$@")
 then
   usage >&2
 fi
@@ -123,6 +137,7 @@ unset opts
 _DEFAULT_=
 _DESC_=
 _REMOVE_=
+_ORPHANS_=
 HALP=
 
 while true; do
@@ -133,6 +148,10 @@ while true; do
       ;;
     -r | --remove)
       export _REMOVE_=true
+      break
+      ;;
+      -o | --orphans)
+      export _ORPHANS_=true
       break
       ;;
     -h | --help)
@@ -148,7 +167,7 @@ done
 
 if [ "$_DEFAULT_" ] || [ "$_DESC_" ]; then
   xbps_finder
-elif [ "$_REMOVE_" ]; then
+elif [ "$_REMOVE_" ] || [ "$_ORPHANS_" ]; then
   xbps_remove
 elif [ "$HALP" ]; then
   help_msg
